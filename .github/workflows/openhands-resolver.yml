@@ -5,27 +5,15 @@ on:
     types: [labeled]
 
 jobs:
-  auto-fix:
-    runs-on: ubuntu-latest
+  call-openhands-resolver:
+    uses: All-Hands-AI/openhands-resolver/.github/workflows/openhands-resolver.yml@main
     if: github.event.label.name == 'fix-me'
-    env:
+    with:
+      issue_number: ${{ github.event.issue.number }}
+      max_iterations: 50
+    secrets:
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      PAT_USERNAME: ${{ secrets.PAT_USERNAME }}
       LLM_MODEL: ${{ secrets.LLM_MODEL }}
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-      PAT_USERNAME: ${{ secrets.PAT_USERNAME }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install openhands-resolver
-      - name: Run resolver
-        run: |
-          python -m openhands_resolver.resolve_issue \
-            --repo ${{ github.repository }} \
-            --issue-number ${{ github.event.issue.number }}
